@@ -9,6 +9,11 @@ export function runParser(file) {
         .then(() => prepareData())
         .then(() => createButton())
 }
+export function runParserOnString(text){
+    extractText(text)
+    prepareData()
+    fillTable()
+}
 
 function readFileAsText(file) {
     return new Promise((resolve) => {
@@ -41,7 +46,7 @@ function createButton() {
     if (document.querySelector('#create-table')) return
     const btn = document.createElement('button')
     btn.textContent = 'Create Table'
-    btn.addEventListener('click', () => {fillTable()})
+    btn.addEventListener('click', () => { fillTable() })
     btn.id = 'create-table'
     
     // document.getElementById resulted in null

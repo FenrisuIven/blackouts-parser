@@ -42,3 +42,7 @@ h1 {
   min-width: 1370px;
   border: 1px solid black;
 }
+
+.margin-top-1rem {
+  margin-top: 1rem;
+}
