@@ -1,4 +1,4 @@
-import { fillTable } from "./tableConstruct.js"
+import { fillTable } from "./table-constructor.js"
 
 export let data = []
 let rawData = []

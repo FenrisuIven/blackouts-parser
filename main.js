@@ -1,7 +1,7 @@
 import './style.css'
 import { runParser, runParserOnString } from "./src/parser.js"
 import { runTGParser } from "./src/tg-parser.js"
-import { firstInit } from "./src/tableConstruct.js";
+import { firstInit } from "./src/table-constructor.js";
 import {predefinedSchedule, lastUpdate} from "./src/predefined-schedule.js";
 
 //Configure manual update from file
