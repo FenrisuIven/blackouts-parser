@@ -29,9 +29,14 @@ function readFileAsText(file) {
 function prepareData() {
     if (data.length !== 0) data = []
     rawData.forEach((line) => {
-        data.push(line.match(/\b\d\b/g))
+        const text = line.match(/\b[0-6]\b/g)
+        const removedDuplicates = [...new Set(text)]
+        data.push(removedDuplicates)
     })
-    console.log(data)
+    
+    if (data.length > 24) {
+        data = data.slice(0, 24)
+    }
 }
 
 function extractText(text) {
