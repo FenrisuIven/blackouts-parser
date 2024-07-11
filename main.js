@@ -13,6 +13,13 @@ document.getElementById('fileInput')
         }
     })
 
+//Configure manual update from textarea
+document.getElementById('submit-text-schedule')
+    .addEventListener('click', () => {
+        const textArea = document.getElementById('input-text-schedule')
+        runParserOnString(textArea.value)
+    })
+
 //Configure 'Load predefined schedule' logic
 document.getElementById('predefined-last-update').textContent = 'Last update: ' + lastUpdate
 document.getElementById('load-predefined')
