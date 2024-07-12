@@ -13,13 +13,13 @@
 ■ 11:00-12:00  6, 1 та 4 черги
 ■ 12:00-13:00  2, 3 та 5 черги
 ■ 13:00-14:00  2, 3 та 5 черги
-■ 14:00-15:00  1, 4 та 6 черги
-■ 15:00-16:00  1, 4 та 6 черги
-■ 16:00-17:00  2, 3, 4 та 5 черги
-■ 17:00-18:00  2, 3, 4 та 5 черги
-■ 18:00-19:00  2, 1, 6 та 5 черги
-■ 19:00-20:00  2, 1, 6 та 5 черги
-■ 20:00-21:00  1, 3, 4 та 6 черги
-■ 21:00-22:00  1, 3, 4 та 6 черги
-■ 22:00-23:00  2, 3, 4 та 5 черги
-■ 23:00-24:00  2, 3 та 5 черги`,C="11.07.2024 at 19:16";document.getElementById("fileInput").addEventListener("input",function(e){const t=e.target.files[0];t&&y(t)});document.getElementById("submit-text-schedule").addEventListener("click",()=>{const e=document.getElementById("input-text-schedule");u(e.value)});document.getElementById("predefined-last-update").textContent="Last update: "+C;document.getElementById("load-predefined").addEventListener("click",()=>{console.log(d),u(d)});document.getElementById("load-from-tg-channel").addEventListener("click",x);m(document.getElementById("blackouts-order-table"));
+■ 14:00-15:00  2, 3, 4 та 1 черги
+■ 15:00-16:00  2, 3, 4 та 1 черги
+■ 16:00-17:00  1, 4, 5 та 6 черги
+■ 17:00-18:00  1, 4, 5 та 6 черги
+■ 18:00-19:00  2, 3, 5 та 6 черги
+■ 19:00-20:00  2, 3, 5 та 6 черги
+■ 20:00-21:00  1, 2, 3 та 4 черги
+■ 21:00-22:00  1, 2, 3 та 4 черги
+■ 22:00-23:00  1, 4, 5 та 6 черги
+■ 23:00-24:00  1, 4, 5 та 6 черги`,C="12.07.2024 at 11:50";document.getElementById("fileInput").addEventListener("input",function(e){const t=e.target.files[0];t&&y(t)});document.getElementById("submit-text-schedule").addEventListener("click",()=>{const e=document.getElementById("input-text-schedule");u(e.value)});document.getElementById("predefined-last-update").textContent="Last update: "+C;document.getElementById("load-predefined").addEventListener("click",()=>{console.log(d),u(d)});document.getElementById("load-from-tg-channel").addEventListener("click",x);m(document.getElementById("blackouts-order-table"));
