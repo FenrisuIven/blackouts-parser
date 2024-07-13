@@ -14,7 +14,7 @@
 ■ 12:00-13:00  1 та 4 черги
 ■ 13:00-14:00  1 та 4 черги
 ■ 14:00-15:00  2, 3 та 6 черги
-■ 15:00-16:00  2, 3 та 6 черги
+■ 15:00-16:00  3 та 6 черги
 ■ 16:00-17:00  1, 4 та 5 черги
 ■ 17:00-18:00  1, 4 та 5 черги
 ■ 18:00-19:00  2, 3 та 6 черги
@@ -22,4 +22,4 @@
 ■ 20:00-21:00  1, 4 та 5 черги
 ■ 21:00-22:00  1, 4 та 5 черги
 ■ 22:00-23:00  2, 3 та 6 черги
-■ 23:00-24:00  2, 3 та 6 черги`,C="13.07.2024 at 12:05";document.getElementById("fileInput").addEventListener("input",function(e){const t=e.target.files[0];t&&y(t)});document.getElementById("submit-text-schedule").addEventListener("click",()=>{const e=document.getElementById("input-text-schedule");u(e.value)});document.getElementById("predefined-last-update").textContent="Last update: "+C;document.getElementById("load-predefined").addEventListener("click",()=>{console.log(d),u(d)});document.getElementById("load-from-tg-channel").addEventListener("click",x);m(document.getElementById("blackouts-order-table"));
+■ 23:00-24:00  2, 3 та 6 черги`,C="13.07.2024 at 14:54";document.getElementById("fileInput").addEventListener("input",function(e){const t=e.target.files[0];t&&y(t)});document.getElementById("submit-text-schedule").addEventListener("click",()=>{const e=document.getElementById("input-text-schedule");u(e.value)});document.getElementById("predefined-last-update").textContent="Last update: "+C;document.getElementById("load-predefined").addEventListener("click",()=>{console.log(d),u(d)});document.getElementById("load-from-tg-channel").addEventListener("click",x);m(document.getElementById("blackouts-order-table"));
