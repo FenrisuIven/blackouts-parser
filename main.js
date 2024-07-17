@@ -1,8 +1,11 @@
 import './style.css'
-import { runParser, runParserOnString } from "./src/parser.js"
-import { runTGParser } from "./src/tg-parser.js"
-import { firstInit } from "./src/table-constructor.js";
-import {predefinedSchedule, lastUpdate} from "./src/predefined-schedule.js";
+import {
+     runParser, runParserOnString, firstInit, runTGParser
+} from "./src"
+import data from "./public/predefined-data/predefined-schedule.json"
+
+const predefinedSchedule = data[0]
+const lastUpdate = data[1]
 
 //Configure manual update from file
 document.getElementById('fileInput')
@@ -24,7 +27,7 @@ document.getElementById('submit-text-schedule')
 document.getElementById('predefined-last-update').textContent = 'Last update: ' + lastUpdate
 document.getElementById('load-predefined')
     .addEventListener('click',() => {
-        console.log(predefinedSchedule)
+        //console.log(predefinedSchedule)
         runParserOnString(predefinedSchedule)
     })
 
@@ -32,5 +35,7 @@ document.getElementById('load-predefined')
 document.getElementById('load-from-tg-channel')
     .addEventListener('click', runTGParser)
 
-//Schedule first init
+//First init of schedule table
 firstInit(document.getElementById('blackouts-order-table'))
+
+document.getElementById('load-predefined').click()
