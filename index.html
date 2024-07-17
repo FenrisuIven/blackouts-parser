@@ -5,27 +5,31 @@
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-    <script type="module" crossorigin src="./assets/index-BTo4k8-U.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CA3P3Whz.css">
+    <script type="module" crossorigin src="./assets/index-BrqGNvlz.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Clp17x_R.css">
   </head>
   <body>
-    <div id="table-div">
+    <main>
+      <header>
+      </header>
       <table id="blackouts-order-table" class="queue-table">
       </table>
-    </div>
-    <div id="app" class="col-gap-2rem">
-      <div class="flex-div">
-        <input type="file" id="fileInput"/>
-        <button id="load-from-tg-channel" disabled="disabled" class="margin-top-1rem">Load data from channel</button>
-        <button id="load-predefined" class="margin-top-1rem">Load existing schedule</button>
-        <span id="predefined-last-update">Last update: 09.07.2024 on 20:10</span>
+      <div id="app" class="col-gap-2rem">
+        <div class="flex-div">
+          <input type="file" id="fileInput"/>
+          <button id="load-from-tg-channel" disabled="disabled" class="margin-top-1rem">Load data from channel</button>
+          <button id="load-predefined" class="margin-top-1rem">Load existing schedule</button>
+          <span id="predefined-last-update">Last update: 09.07.2024 on 20:10</span>
+        </div>
+        <div class="flex-div row-gap-1rem">
+          <label>
+            <textarea id="input-text-schedule" placeholder="■ **:00-**:00  *(, *, *...) та * черги"></textarea>
+          </label>
+          <button id="submit-text-schedule">Submit</button>
+        </div>
       </div>
-      <div class="flex-div row-gap-1rem">
-        <label>
-          <textarea id="input-text-schedule" placeholder="■ **:00-**:00  *(, *, *...) та * черги"></textarea>
-        </label>
-        <button id="submit-text-schedule">Submit</button>
-      </div>
-    </div>
+      <footer>
+      </footer>
+    </main>
   </body>
 </html>
