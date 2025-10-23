@@ -47,6 +47,7 @@ export const BlackoutsTable = ({ bpData }:{ bpData: {
   }
   completeLabels.push(labels[labels.length - 1]);
 
+
   return (
     <>
       <div className="p-5 w-full flex">

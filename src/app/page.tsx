@@ -72,8 +72,11 @@ export default function Home() {
       // which are always in <p> tags starting with a number from 1 to 6
       const latestBlackoutData = relatedToEnergy[0].htmlBody.match(/<p>([1-6].+)<\/p>/gm)
       const blackouts = BP.parseBlackouts(latestBlackoutData || []);
+      BP.formLabels();
 
-      setBlackoutsData({ date: relatedToEnergy[0].date, blackouts })
+      console.log(BP.blackoutsData, BP.labels);
+
+      setBlackoutsData({ date: relatedToEnergy[0].date, blackouts: BP.blackoutsData || [] });
     }
   }, [bpCookie]);
 
