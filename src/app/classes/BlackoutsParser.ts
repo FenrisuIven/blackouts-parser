@@ -33,7 +33,7 @@ export default class BlackoutsParser {
         return null;
       });
 
-    const parsed = JSON.parse(res);
+    const parsed = JSON.parse(res || '');
     this.fetchedBlackouts = parsed;
     return parsed || [];
   }
