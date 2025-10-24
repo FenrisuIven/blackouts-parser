@@ -50,11 +50,10 @@ export const BlackoutsTable = ({ bpData }:{ bpData: {
 
   return (
     <>
+      <div className="w-full flex justify-center">
+        <h1 className="text-2xl">Blackout schedule for: {bpData.date}</h1>
+      </div>
       <div className="p-5 w-full flex">
-        <div className="max-w-50 min-w-50">
-          <h1 className="text-xl mb-2">Blackouts for:</h1>
-          <h1 className="text-xl">{bpData.date}</h1>
-        </div>
         <div className="max-w-70 min-w-70">
           {bpData.blackouts.map(blackout => {
             return <div key={`${blackout.queue}`} className="flex items-center gap-4">

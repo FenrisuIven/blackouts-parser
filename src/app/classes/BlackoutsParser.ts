@@ -85,7 +85,7 @@ export default class BlackoutsParser {
     return blackouts;
   }
 
-  public findTargetTime({ isSearchingForMin }: { isSearchingForMin?: boolean }) {
+  /*public findTargetTime({ isSearchingForMin }: { isSearchingForMin?: boolean }) {
     if (!this.blackoutsData) return;
 
     const startingTime = isSearchingForMin ? this.blackoutsData[0].periods[0].start : this.blackoutsData[0].periods[0].end;
@@ -93,8 +93,8 @@ export default class BlackoutsParser {
 
     for (const blackout of this.blackoutsData) {
       blackout.periods.forEach(period => {
-        const start= DateTime.fromFormat(period.start, "HH:mm");
-        const end= DateTime.fromFormat(period.end, "HH:mm");
+        const start = DateTime.fromFormat(period.start, "HH:mm");
+        const end = DateTime.fromFormat(period.end, "HH:mm");
 
         if (isSearchingForMin !== (start > targetTime)) {
           targetTime = start;
@@ -106,11 +106,12 @@ export default class BlackoutsParser {
     }
 
     return targetTime;
-  }
+  }*/
 
   private setEndingTimes() {
     if (!this.blackoutsData) return;
 
+    // TODO: refactor to use findTargetTime for both starting and ending times
     this.startingTime = DateTime.fromFormat(this.blackoutsData[0].periods[0].start, "HH:mm");
     let endingTime = DateTime.fromFormat(this.blackoutsData[0].periods[0].end, "HH:mm");
     for (const blackout of this.blackoutsData) {

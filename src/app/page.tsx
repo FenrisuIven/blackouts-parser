@@ -6,7 +6,7 @@ import { BlackoutsTable } from "@/app/components/BlackoutsTable";
 import BlackoutsParser from "@/app/classes/BlackoutsParser";
 import { useEffect, useState } from "react";
 
-// scary shi
+//TODO: Move out placeholder types
 export default function Home() {
   const [ bpCookie, setBpCookie ] = useState<string | null>(null);
   const [ blackoutsData, setBlackoutsData ] = useState<{
@@ -19,13 +19,14 @@ export default function Home() {
       }>;
     }>
   } | null>(null);
+  const [graphicsNews, setGraphicsNews] = useState<Array<{ id: number, date: string }>>([]);
 
   const BP = new BlackoutsParser('https://gita.cherkasyoblenergo.com/obl-main-controller//api/news');
 
   useEffect(() => {
     const bpData = localStorage.getItem('blackouts');
 
-    if (!bpData) { //if val in LS is not set -- refetch the data from API
+    if (!bpData) {
       BP.fetchBlackouts().then(fetchedData => {
         setBpCookie(JSON.stringify(fetchedData));
       });
@@ -33,10 +34,11 @@ export default function Home() {
     }
 
     const parsed: Array<{ id: number, date: string, htmlBody: string }> = JSON.parse(bpData);
-    const latest = DateTime.fromFormat(parsed[0].date.split(" ")[0], "dd.MM.yyyy");
+    const todaysDate = DateTime.now().toFormat("dd.MM.yyyy");
+    const todaysEntryId = parsed.findIndex(item => item.date.startsWith(todaysDate));
+    const latest = DateTime.fromFormat(parsed[todaysEntryId === -1 ? 0 : todaysEntryId].date.split(" ")[0], "dd.MM.yyyy");
 
-    // if the latest data is older than today -- refetch
-    // should ideally be a check for the specific amount of hours, but this works for now
+    // TODO: check the relevance by hours
     if (latest < DateTime.now().startOf('day')) {
       BP.fetchBlackouts().then(fetchedData => {
         setBpCookie(JSON.stringify(fetchedData));
@@ -47,14 +49,11 @@ export default function Home() {
     setBpCookie(bpData);
   }, [])
 
-  // when bpCookie is set -- parse and set blackouts data
   useEffect(() => {
     console.log({ bpCookie });
     if(bpCookie) {
       const parsedData: Array<{ id: number, date: string, htmlBody: string }> = JSON.parse(bpCookie);
 
-      // get only news entries related to energy blackouts
-      // those conveniently always contain the "ГПВ" substring somewhere in the htmlBody
       const relatedToEnergy = parsedData.filter(item => item.htmlBody.includes("ГПВ"))
         .map(item => {
           return {
@@ -64,24 +63,54 @@ export default function Home() {
           }
         });
 
-      console.log({ relatedToEnergy });
-      localStorage.setItem('blackouts', JSON.stringify(relatedToEnergy));
+      setGraphicsNews(relatedToEnergy
+        .map(item => ({
+          id: item.id,
+          date: item.date
+        }))
+      )
 
-      // since the htmlBody contains full news text,
-      // we need to extract only the relevant parts with blackout schedules,
-      // which are always in <p> tags starting with a number from 1 to 6
       const latestBlackoutData = relatedToEnergy[0].htmlBody.match(/<p>([1-6].+)<\/p>/gm)
-      const blackouts = BP.parseBlackouts(latestBlackoutData || []);
+      BP.parseBlackouts(latestBlackoutData || []);
+
+      // TODO: Pass generated labels instead of generating them in the table component
       BP.formLabels();
-
-      console.log(BP.blackoutsData, BP.labels);
-
       setBlackoutsData({ date: relatedToEnergy[0].date, blackouts: BP.blackoutsData || [] });
+
+      // TODO: change the obj to contain both the post date and "for day" date
+      //       currently only post date is stored and is treated as "for day" date
+      localStorage.setItem('blackouts', JSON.stringify(relatedToEnergy));
     }
   }, [bpCookie]);
 
   return (
     <div>
+      <div className="p-5">
+        <div className="max-w-50 min-w-50">
+          <h1 className="text-xl mb-2">Blackouts for:</h1>
+          <select onChange={(e) => {
+            // TODO: set current date as default selected option
+            const newValue = Number(e.target.value)
+
+            // TODO: move out the selection logic into a separate function
+            const LSdata = JSON.parse(bpCookie || '[]') as Array<{ id: number, date: string, htmlBody: string }>;
+            const targetEntry = LSdata.find(item => item.id === newValue);
+
+            if (targetEntry) {
+              const blackoutData = BP.parseBlackouts(
+                targetEntry.htmlBody.match(/<p>([1-6].+)<\/p>/gm) || []
+              );
+              setBlackoutsData({ date: targetEntry.date, blackouts: blackoutData });
+            }
+          }}>
+            {graphicsNews.map(item => {
+                console.log({item});
+                return <option key={item.id} value={item.id}>{item.date}</option>
+              })
+            }
+          </select>
+        </div>
+      </div>
       <BlackoutsTable bpData={blackoutsData || {date: '', blackouts: []}}/>
     </div>
   );
