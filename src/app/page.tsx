@@ -1,25 +1,23 @@
 "use client"
 
-import {DateTime} from "luxon"
+import {DateTime, DateTimeMaybeValid} from "luxon"
 
 import { BlackoutsTable } from "@/app/components/BlackoutsTable";
 import BlackoutsParser from "@/app/classes/BlackoutsParser";
 import { useEffect, useState } from "react";
 
+import {type Blackout, BlackoutNewsEntry} from "@/app/types";
+
 //TODO: Move out placeholder types
 export default function Home() {
   const [ bpCookie, setBpCookie ] = useState<string | null>(null);
   const [ blackoutsData, setBlackoutsData ] = useState<{
-    date: string,
-    blackouts: Array<{
-      queue: string;
-      periods: Array<{
-        start: string;
-        end: string;
-      }>;
-    }>
+    date: DateTimeMaybeValid | string,
+    blackouts: Array<Blackout>
   } | null>(null);
-  const [graphicsNews, setGraphicsNews] = useState<Array<{ id: number, date: string }>>([]);
+  const [graphicsNews, setGraphicsNews] = useState<Array<BlackoutNewsEntry>>([]);
+
+  const [labels, setLabels] = useState<Array<string>>([]);
 
   const BP = new BlackoutsParser('https://gita.cherkasyoblenergo.com/obl-main-controller//api/news');
 
@@ -33,13 +31,19 @@ export default function Home() {
       return;
     }
 
-    const parsed: Array<{ id: number, date: string, htmlBody: string }> = JSON.parse(bpData);
-    const todaysDate = DateTime.now().toFormat("dd.MM.yyyy");
-    const todaysEntryId = parsed.findIndex(item => item.date.startsWith(todaysDate));
-    const latest = DateTime.fromFormat(parsed[todaysEntryId === -1 ? 0 : todaysEntryId].date.split(" ")[0], "dd.MM.yyyy");
+    const parsed: Array<BlackoutNewsEntry> = JSON.parse(bpData);
+    const todaysDate = DateTime.now();
+    const todaysEntryId = parsed.findIndex(item => {
+      if (typeof item.dateTimePosted === 'string') {
+        return DateTime.fromISO(item.dateTimePosted).toFormat('dd MM yyyy') === todaysDate.toFormat("dd MM yyyy");
+      }
+      return item.dateTimePosted.toFormat('dd MM yyyy') === todaysDate.toFormat("dd MM yyyy");
+    });
+    const latest = parsed[todaysEntryId === -1 ? 0 : todaysEntryId].dateTimePosted;
 
-    // TODO: check the relevance by hours
-    if (latest < DateTime.now().startOf('day')) {
+    // TODO: try fetching news by <latest-id> + 1
+    //       if exists -- try refetching, since updates may have occurred
+    if (latest instanceof DateTime && latest < todaysDate.minus({ hours: 1 })) {
       BP.fetchBlackouts().then(fetchedData => {
         setBpCookie(JSON.stringify(fetchedData));
       });
@@ -52,34 +56,19 @@ export default function Home() {
   useEffect(() => {
     console.log({ bpCookie });
     if(bpCookie) {
-      const parsedData: Array<{ id: number, date: string, htmlBody: string }> = JSON.parse(bpCookie);
+      const parsedData: Array<BlackoutNewsEntry> = JSON.parse(bpCookie);
 
-      const relatedToEnergy = parsedData.filter(item => item.htmlBody.includes("ГПВ"))
-        .map(item => {
-          return {
-            id: item.id,
-            date: item.date,
-            htmlBody: item.htmlBody
-          }
-        });
+      setGraphicsNews(parsedData)
 
-      setGraphicsNews(relatedToEnergy
-        .map(item => ({
-          id: item.id,
-          date: item.date
-        }))
-      )
-
-      const latestBlackoutData = relatedToEnergy[0].htmlBody.match(/<p>([1-6].+)<\/p>/gm)
+      const latestBlackoutData = parsedData[0].content.htmlBody.match(/<p>([1-6].+)<\/p>/gm)
       BP.parseBlackouts(latestBlackoutData || []);
 
       // TODO: Pass generated labels instead of generating them in the table component
-      BP.formLabels();
-      setBlackoutsData({ date: relatedToEnergy[0].date, blackouts: BP.blackoutsData || [] });
+      setLabels(BP.formLabels());
+      setBlackoutsData({ date: parsedData[0].dateTimeTarget, blackouts: BP.blackoutsData || [] });
 
-      // TODO: change the obj to contain both the post date and "for day" date
-      //       currently only post date is stored and is treated as "for day" date
-      localStorage.setItem('blackouts', JSON.stringify(relatedToEnergy));
+      console.log({ parsedData });
+      localStorage.setItem('blackouts', JSON.stringify(parsedData));
     }
   }, [bpCookie]);
 
@@ -93,25 +82,38 @@ export default function Home() {
             const newValue = Number(e.target.value)
 
             // TODO: move out the selection logic into a separate function
-            const LSdata = JSON.parse(bpCookie || '[]') as Array<{ id: number, date: string, htmlBody: string }>;
-            const targetEntry = LSdata.find(item => item.id === newValue);
+            const LSdata = JSON.parse(bpCookie || '[]') as Array<BlackoutNewsEntry>;
+            const targetEntry = LSdata.find(item => item.content.id === newValue);
 
             if (targetEntry) {
               const blackoutData = BP.parseBlackouts(
-                targetEntry.htmlBody.match(/<p>([1-6].+)<\/p>/gm) || []
+                targetEntry.content.htmlBody.match(/<p>([1-6].+)<\/p>/gm) || []
               );
-              setBlackoutsData({ date: targetEntry.date, blackouts: blackoutData });
+              setBlackoutsData({ date: targetEntry.dateTimeTarget, blackouts: blackoutData });
             }
           }}>
             {graphicsNews.map(item => {
-                console.log({item});
-                return <option key={item.id} value={item.id}>{item.date}</option>
+                const targetTime = typeof item.dateTimeTarget === 'string'
+                  ? DateTime.fromISO(item.dateTimeTarget)
+                  : item.dateTimeTarget;
+                const postedTime = typeof item.dateTimePosted === 'string'
+                  ? DateTime.fromISO(item.dateTimePosted)
+                  : item.dateTimePosted;
+
+                const target = targetTime.toFormat("dd.MM.yyyy, HH:mm");
+                const update = postedTime.toFormat("dd.MM HH:mm");
+
+                const updateIndicator = targetTime < postedTime ? 'upd: ' : '';
+
+                return <option key={item.content.id} value={item.content.id}>
+                  {target} ({updateIndicator}{update})
+                </option>
               })
             }
           </select>
         </div>
       </div>
-      <BlackoutsTable bpData={blackoutsData || {date: '', blackouts: []}}/>
+      <BlackoutsTable bpData={blackoutsData || {date: '', blackouts: []}} labels={labels}/>
     </div>
   );
 }

@@ -1,36 +1,51 @@
 import { Axios } from "axios";
 import { DateTime } from "luxon";
+import {Blackout, BlackoutNewsEntry, RawNewsContent} from "@/app/types";
 
 export default class BlackoutsParser {
-  blackoutsData: Array<{
-    queue: string;
-    periods: Array<{
-      start: string;
-      end: string;
-    }>;
-  }> | null = null;
+  blackoutsData: Array<Blackout> | null = null;
+  fetchedBlackouts: Array<BlackoutNewsEntry> | null = null;
 
-  fetchedBlackouts: Array<{
-    id: number,
-    date: string,
-    htmlBody: string
-  }> | null = null;
-
-  labels: Array<string> | null = null;
+  private _labels: Array<string> | null = null;
   startingTime: DateTime | null = null;
   endingTime: DateTime | null = null;
 
-  constructor(
-    public targetUrl: string,
-  ) {
-
+  public get labels(): Array<string> {
+    let labels: Array<string> = [];
+    if (!this._labels) {
+      labels = this.formLabels();
+    }
+    return this._labels || labels;
   }
 
-  public async fetchBlackouts(): Promise<{
-    id: number,
-    date: string,
-    htmlBody: string
-  }[]> {
+  constructor(public targetUrl: string) {}
+
+  private parseBlackoutNewsEntry(rawEntry: RawNewsContent): BlackoutNewsEntry {
+    const obj: BlackoutNewsEntry = {
+      dateTimePosted: '',
+      dateTimeTarget: '',
+      content: {
+        id: 0,
+        date: DateTime.now(),
+        htmlBody: '',
+      },
+    };
+    obj.dateTimePosted = DateTime.fromFormat(rawEntry.date, "dd.MM.yyyy HH:mm");
+
+    const rawTargetTime = rawEntry.htmlBody.match(/(\d{1,2}\s[а-я]+\s\S+\s+\d{2}:\d{2})/gm);
+    const targetTime = rawTargetTime ? DateTime.fromFormat(rawTargetTime[0], "dd MMMM 'з' HH:mm", { locale: 'uk-UA' }) : null;
+    obj.dateTimeTarget = targetTime || '';
+
+    obj.content = {
+      id: rawEntry.id,
+      date: DateTime.fromFormat(rawEntry.date, "dd.MM.yyyy HH:mm"),
+      htmlBody: rawEntry.htmlBody,
+    };
+
+    return obj;
+  }
+
+  public async fetchBlackouts(): Promise<BlackoutNewsEntry[]> {
     const axios = new Axios();
 
     const res = await axios.get<string>(this.targetUrl)
@@ -40,9 +55,19 @@ export default class BlackoutsParser {
         return null;
       });
 
-    const parsed = JSON.parse(res || '');
-    this.fetchedBlackouts = parsed;
-    return parsed || [];
+    const rawNews: RawNewsContent[] = JSON.parse(res || '');
+    const newsWithBlackouts = rawNews.filter(entry => entry.htmlBody.includes("ГПВ"));
+    const parsedBlackoutEntries: BlackoutNewsEntry[] = newsWithBlackouts.map((entry, index) => {
+      const parsedEntry = this.parseBlackoutNewsEntry(entry);
+      if (parsedEntry.dateTimeTarget == '') {
+        const previous = this.parseBlackoutNewsEntry(newsWithBlackouts[index + 1]);
+        parsedEntry.dateTimeTarget = previous.dateTimeTarget;
+      }
+      return parsedEntry;
+    });
+
+    this.fetchedBlackouts = parsedBlackoutEntries;
+    return parsedBlackoutEntries || [];
   }
 
   public parseBlackouts(data?: string[]): Array<{
@@ -129,9 +154,9 @@ export default class BlackoutsParser {
     this.endingTime = endingTime;
   }
 
-  public formLabels() {
-    if (!this.blackoutsData) return;
-    if (!this.startingTime || !this.endingTime) return;
+  public formLabels(): Array<string> {
+    if (!this.blackoutsData) return [];
+    if (!this.startingTime || !this.endingTime) return [];
 
     const labels = [];
 
@@ -154,7 +179,9 @@ export default class BlackoutsParser {
       }
     }
 
-    this.labels = labels;
+    console.log('BP', {labels})
+
+    this._labels = labels;
     return labels;
   }
 }
