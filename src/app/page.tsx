@@ -63,8 +63,10 @@ export default function Home() {
       const latestBlackoutData = parsedData[0].content.htmlBody.match(/<p>([1-6].+)<\/p>/gm)
       BP.parseBlackouts(latestBlackoutData || []);
 
-      // TODO: Pass generated labels instead of generating them in the table component
-      setLabels(BP.formLabels());
+      setLabels(BP.formLabels({
+        startTime: 8,
+        endTime: 24
+      }));
       setBlackoutsData({ date: parsedData[0].dateTimeTarget, blackouts: BP.blackoutsData || [] });
 
       console.log({ parsedData });

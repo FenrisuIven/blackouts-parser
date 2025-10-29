@@ -1,5 +1,5 @@
 import { Axios } from "axios";
-import { DateTime } from "luxon";
+import {DateTime, DateTimeMaybeValid} from "luxon";
 import {Blackout, BlackoutNewsEntry, RawNewsContent} from "@/app/types";
 
 export default class BlackoutsParser {
@@ -110,8 +110,8 @@ export default class BlackoutsParser {
     return blackouts;
   }
 
-  /*public findTargetTime({ isSearchingForMin }: { isSearchingForMin?: boolean }) {
-    if (!this.blackoutsData) return;
+  public findTargetTime({ isSearchingForMin }: { isSearchingForMin?: boolean }) {
+    if (!this.blackoutsData) return null;
 
     const startingTime = isSearchingForMin ? this.blackoutsData[0].periods[0].start : this.blackoutsData[0].periods[0].end;
     let targetTime = DateTime.fromFormat(startingTime, "HH:mm");
@@ -131,32 +131,23 @@ export default class BlackoutsParser {
     }
 
     return targetTime;
-  }*/
+  }
 
   private setEndingTimes() {
     if (!this.blackoutsData) return;
 
-    // TODO: refactor to use findTargetTime for both starting and ending times
-    this.startingTime = DateTime.fromFormat(this.blackoutsData[0].periods[0].start, "HH:mm");
-    let endingTime = DateTime.fromFormat(this.blackoutsData[0].periods[0].end, "HH:mm");
-    for (const blackout of this.blackoutsData) {
-      blackout.periods.forEach(period => {
-        const start= DateTime.fromFormat(period.start, "HH:mm");
-        const end= DateTime.fromFormat(period.end, "HH:mm");
-        if (start > endingTime) {
-          endingTime = start;
-        }
-        if (end > endingTime) {
-          endingTime = end;
-        }
-      })
-    }
-    this.endingTime = endingTime;
+    this.startingTime = this.findTargetTime({ isSearchingForMin: true });
+    this.endingTime = this.findTargetTime({ isSearchingForMin: false });
   }
 
-  public formLabels(): Array<string> {
+  public formLabels(args?: {
+    startTime?: number,
+    endTime?: number
+  }): Array<string> {
     if (!this.blackoutsData) return [];
     if (!this.startingTime || !this.endingTime) return [];
+
+    const { startTime, endTime } = args || {};
 
     const labels = [];
 
@@ -169,17 +160,17 @@ export default class BlackoutsParser {
       });
     })
 
-    const startHour = this.startingTime.hour;
-    const endHour = this.endingTime.hour;
+    const startHour = startTime || this.startingTime.hour;
+    const endHour = endTime || this.endingTime.hour;
 
-    for (let i = startHour; i < endHour; i++) {
+    for (let i = startHour; i < endHour + 1; i++) {
       labels.push(`${i}:00`);
-      if (isHalvesPresent && i !== endHour - 1) {
+      if (isHalvesPresent && i !== endHour) {
         labels.push(`${i}:30`);
       }
     }
 
-    console.log('BP', {labels})
+    console.log({ endHour });
 
     this._labels = labels;
     return labels;
