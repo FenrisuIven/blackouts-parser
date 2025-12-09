@@ -33,7 +33,7 @@ export default class BlackoutsParser {
     obj.dateTimePosted = DateTime.fromFormat(rawEntry.date, "dd.MM.yyyy HH:mm");
 
     const rawTargetTime = rawEntry.htmlBody.match(/(\d{1,2}\s[а-я]+\s\S+\s+\d{2}:\d{2})/gm);
-    const targetTime = rawTargetTime ? DateTime.fromFormat(rawTargetTime[0], "dd MMMM 'з' HH:mm", { locale: 'uk-UA' }) : null;
+    const targetTime = rawTargetTime ? DateTime.fromFormat(rawTargetTime[0], "d MMMM 'з' HH:mm", { locale: 'uk-UA' }) : null;
     obj.dateTimeTarget = targetTime || '';
 
     obj.content = {
@@ -56,17 +56,33 @@ export default class BlackoutsParser {
       });
 
     const rawNews: RawNewsContent[] = JSON.parse(res || '');
+    console.log({rawNews});
     const newsWithBlackouts = rawNews.filter(entry => entry.htmlBody.includes("ГПВ"));
     const parsedBlackoutEntries: BlackoutNewsEntry[] = newsWithBlackouts.map((entry, index) => {
       const parsedEntry = this.parseBlackoutNewsEntry(entry);
+      if (parsedEntry.content.id == 4053) {
+        console.log({entry, parsedEntry, index});
+      }
+
+      if (parsedEntry.dateTimePosted == '') {
+        console.warn(parsedEntry);
+      }
+
       if (parsedEntry.dateTimeTarget == '') {
-        const previous = this.parseBlackoutNewsEntry(newsWithBlackouts[index + 1]);
-        parsedEntry.dateTimeTarget = previous.dateTimeTarget;
+        parsedEntry.dateTimeTarget = parsedEntry.dateTimePosted;
+      }
+
+      console.log(parsedEntry.dateTimeTarget, parsedEntry.dateTimePosted);
+      if (parsedEntry.content.id == 4053) {
+        console.log(parsedEntry);
       }
       return parsedEntry;
     });
 
     this.fetchedBlackouts = parsedBlackoutEntries;
+    console.log(this.fetchedBlackouts.find(entry => {
+      return entry.dateTimeTarget == '';
+    }))
     return parsedBlackoutEntries || [];
   }
 

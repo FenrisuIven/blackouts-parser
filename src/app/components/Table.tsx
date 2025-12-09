@@ -16,7 +16,7 @@ export const Table = ({ labels, data }: {
       <div className="flex">
         <div className="border-2 border-white min-w-15 text-center"/>
         {labels.map((label) => {
-          const key = crypto.randomUUID();
+          const key = Math.random();
           let className = "border-2 border-white min-w-15 text-center";
           if (!currentLabel) {
             const currentTime = DateTime.now().toFormat("HH:00");
@@ -31,12 +31,12 @@ export const Table = ({ labels, data }: {
       </div>
       <data className="flex flex-col">
         {data.map(blackout => {
-          const key = crypto.randomUUID();
+          const key = Math.random();
 
           return <div className="flex" key={key}>
             <div className="min-w-15 h-10 border-2 border-white text-center align-middle flex flex-wrap content-center justify-center">{blackout.queue}</div>
               {Array.from({length: labels.length}).map((_, idx) => {
-                const blKey = crypto.randomUUID();
+                const blKey = Math.random();
                 const isPeriodRelevant = blackout.periods.some(period => {
                   if (period.start === labels[idx] || period.end === labels[idx]) {
                     return true;
